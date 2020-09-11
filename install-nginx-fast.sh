@@ -18,11 +18,13 @@ echo -e " ${BLUE} Menu :${NC}
 
 ${GREEN}####### Nginx install ######${NC}
 1 : nginx php7
-2 : nginx proxy
-3 : nginx proxy mail
+2 : nginx proxy (TODO)
+3 : nginx proxy mail (TODO)
 ${GREEN}####### BDD install ######${NC}
 20 : Postgres
 21 : mariadb + phpmyadmin
+${GREEN}####### SSL ######${NC}
+30 : Install Let's encrypt certificate
 
 100 : quit
 "
@@ -53,6 +55,9 @@ case $menu in
         ;;
 
 
+	30) ##  Let's encrypt
+		installation_letsencrypt
+	;;
 
 esac
 done

@@ -54,8 +54,7 @@ check_php() {
 # function install postgres
 installation_postgres(){
 	PHPVERSION=check_php
-        apt-get install -y postgresql postgresql-client postgresql-contrib
-	apt-get install -y php-dom  php-pgsql
+        apt-get install -y postgresql postgresql-client postgresql-contrib php-dom  php-pgsql
 }
 
 
@@ -92,4 +91,18 @@ installation_mariadb(){
 
 
 
+}
+
+
+installation_letsencrypt()[
+	# install packages
+	add-apt-repository ppa:certbot/certbot
+	apt-get -y install python-certbot-nginx
+	# configuration
+	echo -e " ${GREEN} DNS name of the server {NC}"
+	read DNSNAME
+	sed -i  's/%%DNSNAME%%/'$DNSNAME'/g' /etc/nginx/sites-enabled/default 
+	nginx -t && nginx -s reload
+	certbot --nginx -d $DNSNAME
+	echo -e " ${YELLOW}  crontab to add : 0 12 * * * /usr/bin/certbot renew --quiet {NC}"
 }
