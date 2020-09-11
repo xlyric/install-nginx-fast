@@ -62,7 +62,7 @@ installation_postgres(){
 # function install mariadb
 installation_mariadb(){
 
-	apt-get install -y mariadb-server mariadb-client php-mysql wget php-mbstring
+	apt-get install -y mariadb-server mariadb-client php-mysql wget php-mbstring php-zip
 	echo -e " ${GREEN} enable mariadb${NC}"
 	systemctl enable mariadb
 	echo -e " ${GREEN} secure mariadb${NC}"
@@ -88,8 +88,7 @@ installation_mariadb(){
 
 	# secure Phpmyadmin
 	blowfish_secret=$( cat  /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
-	#sed 's/$cfg[\'blowfish_secret\'] = \'\';/$cfg[\'blowfish_secret\'] = /''$blowfish_secret'/';'/g'  /opt/phpMyAdmin/config.sample.inc.php
- 	echo "$cfg['blowfish_secret'] = '$blowfish_secret';" >> /opt/phpMyAdmin/libraries/config.default.php
+ 	echo "\$cfg['blowfish_secret'] = '$blowfish_secret';" >> /opt/phpMyAdmin/libraries/config.default.php
 
 
 
