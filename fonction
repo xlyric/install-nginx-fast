@@ -1,0 +1,96 @@
+#!/bin/bash
+
+# librairy
+
+# colors
+	GREEN='\033[0;32m'
+	RED='\033[1;31m'
+	YELLOW='\033[0;33m'
+	BLUE='\033[1;34m'
+	NC='\033[0m' # No Color
+
+
+# function install Nginx - PHP7
+installation_nginx_php7() {
+
+        ###
+        apt-get install -y nginx  php-fpm  php-memcached memcached php
+
+        #conf  php avec Nginx
+        cp $CONFFILES/test.php /var/www/html/
+        cp $CONFFILES/nginx_default_php7 /etc/nginx/sites-enabled/default
+        service nginx restart
+
+        # conf memcache
+        cp $CONFFILES/memcached.conf /etc/memcached.conf
+        service memcached restart
+}
+
+
+# function install Nginx - PHP7
+installation_nginx_php7() {
+
+        ###
+        apt-get install -y nginx  php-fpm  php-memcached memcached php
+
+        #conf  php avec Nginx
+        cp $CONFFILES/test.php /var/www/html/
+        cp $CONFFILES/nginx_default_php7 /etc/nginx/sites-enabled/default
+        service nginx restart
+
+        # conf memcache
+        cp $CONFFILES/memcached.conf /etc/memcached.conf
+        service memcached restart
+}
+
+
+
+
+# function check php version
+check_php() {
+        php -version | grep PHP |grep --only-matching --perl-regexp "\d+\.\\d+\.\\d+" | cut -d"." -f1
+}
+
+# function install postgres
+installation_postgres(){
+	PHPVERSION=check_php
+        apt-get install -y postgresql postgresql-client postgresql-contrib
+	apt-get install -y php-dom  php-pgsql
+}
+
+
+# function install mariadb
+installation_mariadb(){
+
+	apt-get install -y mariadb-server mariadb-client php-mysql wget php-mbstring
+	echo -e " ${GREEN} enable mariadb${NC}"
+	systemctl enable mariadb
+	echo -e " ${GREEN} secure mariadb${NC}"
+	mysql_secure_installation
+
+	# create phpmyadmin account
+	echo -e " ${GREEN} Name of the Phpmyadmin Account${NC}"
+	read Phpmyadminname
+        echo -e " ${GREEN} Phpmyadmin Password${NC}"
+        read -s Phpmyadminpwd
+	echo "GRANT ALL ON *.* TO '$Phpmyadminname'@'localhost' IDENTIFIED BY '$Phpmyadminpwd'; " > request
+	echo "FLUSH PRIVILEGES;" >> request
+        echo -e " ${GREEN} enter root BDD password for create $Phpmyadminname account${NC}"
+	mysql -u root -p < request
+	rm request
+
+	# install phpmyadmin
+	wget -O phpMyAdmin.zip  https://files.phpmyadmin.net/phpMyAdmin/5.0.2/phpMyAdmin-5.0.2-all-languages.zip 
+	unzip phpMyAdmin.zip -d /opt
+	mv /opt/phpMyAdmin* /opt/phpMyAdmin
+	chown -R www-data:www-data /opt/phpMyAdmin
+	ln -s /opt/phpMyAdmin /var/www/html/phpmyadmin
+
+	# secure Phpmyadmin
+	blowfish_secret=$( cat  /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1 )
+	#sed 's/$cfg[\'blowfish_secret\'] = \'\';/$cfg[\'blowfish_secret\'] = /''$blowfish_secret'/';'/g'  /opt/phpMyAdmin/config.sample.inc.php
+ 	echo "$cfg['blowfish_secret'] = '$blowfish_secret';" >> /opt/phpMyAdmin/libraries/config.default.php
+
+
+
+}
